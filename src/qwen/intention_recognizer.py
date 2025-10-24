@@ -1,7 +1,6 @@
 # intention_recognizer.py
 import os
 import json
-from tarfile import NUL
 import yaml
 from dashscope import Generation
 
@@ -30,7 +29,7 @@ def load_intent_config() -> dict:
         except yaml.YAMLError as e:
             raise ValueError(f"解析 YAML 文件失败：{str(e)}")
 
-def recognize_intent(user_input: str) -> str:
+def recognize_intent(user_input: str) -> str or None:
     """
     识别用户输入的意图（从 YAML 加载配置，序列化后调用 API）
     
@@ -38,7 +37,7 @@ def recognize_intent(user_input: str) -> str:
         user_input: 用户输入的文本
         
     返回:
-        意图标签（字符串），如果未识别则返回 "UNKNOWN"
+        意图标签（字符串），如果未识别则返回 None
     """
     try:
         # 1. 加载 YAML 中的意图配置
@@ -69,19 +68,12 @@ Just reply with the chosen tag."""
         )
         
         # 6. 解析返回结果
-        intent_tag = response.output.choices[0].message.content.strip()
-        
-        # 验证标签是否在配置中
-        if intent_tag in intent_dict:
-            return intent_tag
-        # 7. 如果标签不在配置中，返回 UNKNOWN，避免同义自身出问题
-        else: 
-            return "UNKNOWN"
+        return response.output.choices[0].message.content.strip()
             
-    except Exception as e:
+    except Exception:
         return None
 
 # 测试
 if __name__ == "__main__":
     test_input = "hello!"
-    print(recognize_intent(test_input))  # 预期输出: TRAIN_TICKET
+    print(recognize_intent(test_input))  # 预期输出: GREETING
