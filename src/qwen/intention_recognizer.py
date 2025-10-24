@@ -4,50 +4,50 @@ import json
 import yaml
 from dashscope import Generation
 
-def load_intent_config() -> dict:
-    """从 YAML 文件加载意图配置"""
-    # 获取当前脚本所在目录的绝对路径
-    current_script_dir = os.path.dirname(__file__)
-
-    # 拼接配置文件路径：从当前脚本目录回退2级到项目根目录，再进入config文件夹找目标文件
-    config_path = os.path.join(
-        current_script_dir,  # 起点：当前脚本所在目录（src/qwen）
-        "../../",            # 回退2级到项目根目录
-        "config",            # 进入config文件夹
-        "intention_config.yaml"  # 目标文件名（注意你的文件名是intention，不是intent）
-    )
+def load_intent_config(config_path: str) -> dict:
+    """
+    从 YAML 文件加载意图配置
+    
+    参数:
+        config_path: 完整的DSL配置文件路径
+    """
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"意图配置文件不存在：{config_path}")
     
-    # 读取 YAML 文件并解析为字典
+    # 读取 YAML 文件
     with open(config_path, "r", encoding="utf-8") as f:
         try:
-            intent_dict = yaml.safe_load(f)  # safe_load 避免安全风险
+            # 加载整个DSL文件
+            dsl_data = yaml.safe_load(f)
+            
+            # *** 关键改动: 只提取 "intents" 部分用于识别 ***
+            intent_dict = dsl_data.get("intents")
+            
             if not isinstance(intent_dict, dict):
-                raise ValueError("YAML 文件格式错误，需为键值对结构")
+                raise ValueError("YAML 文件格式错误，'intents' 块必须是键值对结构")
             return intent_dict
         except yaml.YAMLError as e:
             raise ValueError(f"解析 YAML 文件失败：{str(e)}")
 
-def recognize_intent(user_input: str) -> str or None:
+def recognize_intent(user_input: str, config_path: str) -> str or None:
     """
     识别用户输入的意图（从 YAML 加载配置，序列化后调用 API）
     
     参数:
         user_input: 用户输入的文本
+        config_path: DSL配置文件的路径
         
     返回:
         意图标签（字符串），如果未识别则返回 None
     """
     try:
-        # 1. 加载 YAML 中的意图配置
-        intent_dict = load_intent_config()
+        # 1. 加载 YAML 中的意图配置 (使用新函数)
+        intent_dict = load_intent_config(config_path)
         
-        # 2. 将意图字典序列化为 JSON 字符串（发给通义千问）
-        # 注意：ensure_ascii=False 保证中文正常显示（API 需正确识别中文描述）
+        # 2. 将意图字典序列化为 JSON 字符串
         intent_json_str = json.dumps(intent_dict, ensure_ascii=False, indent=2)
         
-        # 3. 构建系统提示（告知模型可选意图范围）
+        # 3. 构建系统提示
         system_prompt = f"""You are Qwen, created by Alibaba Cloud. You are a helpful assistant. 
 You should choose one tag from the tag list:
 {intent_json_str}
@@ -61,7 +61,7 @@ Just reply with the chosen tag."""
         
         # 5. 调用通义千问 API
         response = Generation.call(
-            api_key=os.getenv("DASHSCOPE_API_KEY"),  # 从环境变量获取 API 密钥
+            api_key=os.getenv("DASHSCOPE_API_KEY"),
             model="tongyi-intent-detect-v3",
             messages=messages,
             result_format="message",
@@ -75,5 +75,17 @@ Just reply with the chosen tag."""
 
 # 测试
 if __name__ == "__main__":
+    # 获取 config/workflow_dsl.yaml 的路径
+    test_config_path = os.path.join(
+        os.path.dirname(__file__), 
+        "../../",
+        "config/workflow_dsl.yaml"
+    )
+    
     test_input = "hello!"
-    print(recognize_intent(test_input))  # 预期输出: GREETING
+    print(f"输入: {test_input}")
+    print(f"识别: {recognize_intent(test_input, test_config_path)}") # 预期输出: GREETING
+    
+    test_input_2 = "我的订单ORD12345 什么时候发货？"
+    print(f"输入: {test_input_2}")
+    print(f"识别: {recognize_intent(test_input_2, test_config_path)}") # 预期输出: CHECK_ORDER_STATUS

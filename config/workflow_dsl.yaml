@@ -1,0 +1,33 @@
+# 1. "intents" 块：用于意图识别
+intents:
+  GREETING: "用户在打招呼 (User is greeting)"
+  CHECK_ORDER_STATUS: "用户想查询订单状态 (User wants to check order status)"
+  UNKNOWN: "无法识别的意图 (Unknown intent)"
+
+# 2. "workflow" 块：定义识别到意图后，应该执行什么动作
+workflow:
+  
+  # 意图: GREETING
+  GREETING:
+    action_type: "reply"  # 动作类型：直接回复
+    message: "你好！有什么可以帮你的吗？"
+  
+  # 意图: CHECK_ORDER_STATUS
+  CHECK_ORDER_STATUS:
+    action_type: "extract_and_execute" # 动作类型：提取参数并执行
+    
+    # 定义这个动作需要哪些“槽位”(Slots)或参数
+    required_slots:
+      - name: "order_number"
+        # 如果当前对话中没找到，用来反问用户
+        clarification_prompt: "请问您的订单号是多少？"
+        
+    # 当所有 "required_slots" 都被填满后，要调用的Python模块和函数
+    handler_module: "src.qwen.parse_the_order_number" 
+    # (注意：这里我们暂时复用你的提取函数作为示例，
+    # 实际上这里应该是一个“业务逻辑函数”，比如 handle_order_check)
+    
+  # 意图: UNKNOWN
+  UNKNOWN:
+    action_type: "reply"
+    message: "抱歉，我不太明白您的意思。您可以换一种说法，讲得清楚一些吗？"
