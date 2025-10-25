@@ -1,1 +1,5 @@
 logs/
+venv/
+src/engines/__pycache__/
+src/qwen/__pycache__/
+src/utils/__pycache__/
