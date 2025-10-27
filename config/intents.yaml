@@ -1,3 +1,4 @@
 GREET: "用户向你问好"
 COMPLAIN: "用户投诉产品"
+PRAISE: "用户表扬产品"
 UNKNOWN: "用户表达未知意图"
