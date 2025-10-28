@@ -8,7 +8,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # 若项目根目录未在搜索路径中，则添加（避免重复添加）
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
+
 from src.utils.log import log
+
 log("项目根目录已加入 Python 搜索路径", 1, __file__)
 
 # --------------------------
