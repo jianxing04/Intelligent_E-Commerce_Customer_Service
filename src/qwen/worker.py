@@ -72,3 +72,47 @@ def recognize_intent(user_input: str, intent_dict: dict) -> Optional[str]:
         return None
 
     return detected_intent
+
+def pharse_phone_number(user_input: str) -> Optional[str]:
+    """
+    从文本中提取手机号码（假设手机号码为11位数字）
+    
+    参数:
+        user_input: 输入文本
+    返回:
+        提取到的手机号码字符串，若未找到则返回None
+    """
+    # 输入合法性验证（自身逻辑异常：主动处理）
+    if not isinstance(user_input, str) or not user_input.strip():
+        log("用户输入为空或非字符串类型", 2, __file__)
+        return None
+    
+    system_prompt = f"""你是电话号码识别工具，需从以下聊天记录中识别出手机号码，仅返回手机号码本身，不添加任何额外内容。
+假设手机号码为11位数字。若未找到手机号码，则返回空字符串。"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_input.strip()}
+    ]
+
+    # API密钥验证（自身逻辑异常：主动处理）
+    api_key = os.getenv("DASHSCOPE_API_KEY")
+    if not api_key:
+        log("环境变量DASHSCOPE_API_KEY未设置或为空", 1, __file__)
+        return None
+    if not isinstance(api_key, str) or not api_key.strip():
+        log("环境变量DASHSCOPE_API_KEY的值无效（非字符串或空）", 1, __file__)
+        return None
+
+    # 调用通义千问API（第三方异常：不捕获，直接抛出）
+    response = Generation.call(
+        api_key=api_key,
+        model="qwen-plus",
+        messages=messages,
+        result_format="message",
+    )
+
+    phone_number=response.output.choices[0].message.content.strip()
+    if phone_number == "":
+        return None
+    return phone_number

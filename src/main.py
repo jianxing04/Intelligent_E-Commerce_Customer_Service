@@ -17,36 +17,17 @@ log("项目根目录已加入 Python 搜索路径", 1, __file__)
 # 后续所有模块都能直接绝对导入
 # --------------------------
 # 1. 导入业务模块（如 qwen 的 receiver）
-from src.qwen.receiver import QwenReceiver  
+from src.qwen.receiver import Receiver  
 
-def run_chat_loop():
+def run_chat():
     """
     运行一个简单的命令行聊天循环
     """
-    acceptant = QwenReceiver()
+    acceptant = Receiver()
     print("聊天机器人已启动。(输入 'exit' 退出)")
     
-    while True:
-        # 1. 获取用户输入
-        user_input = input("你: ").strip()
-        
-        if user_input.lower() == 'exit':
-            print("机器人: 再见！")
-            break
-        
-        if not user_input:
-            continue
-            
-        # 2. 交给引擎处理
-        response = acceptant.intent_recognize(user_input)
-        
-        if response is None:
-            print("==========程序意图识别出错，请联系开发者==========")
-            continue
-        
-        # 3. 打印回复
-        print(f"机器人: {response}")
+    acceptant.execute()
 
 if __name__ == "__main__":
     # 运行
-    run_chat_loop()
+    run_chat()

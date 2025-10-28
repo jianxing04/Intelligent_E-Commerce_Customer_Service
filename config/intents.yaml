@@ -4,77 +4,11 @@
 # 问候意图：用户打招呼时的响应逻辑
 GREET:
   description: 用户发起问候（如"你好"、"嗨"）
-  steps:
-    - action: "check_user_status"  # 检查用户状态（新用户/老用户）
-      params:
-        user_id: "${current_user.id}"  # 引用当前用户ID
-      output_var: "user_status"  # 结果存入变量
-      
-    - action: "generate_greeting"  # 生成问候语
-      params:
-        nickname: "${current_user.nickname || '用户'}"  # 优先用昵称，否则用默认称谓
-        is_new: "${user_status == 'new'}"  # 根据用户状态判断是否为新用户
-      output_var: "response_content"  # 问候语存入变量
-      
-    - action: "send_response"  # 发送响应给用户
-      params:
-        content: "${response_content}"
-      terminal: true  # 此步骤为终端操作，执行后结束流程
+  actions:
+    - greet  # 调用问候动作
 
 # 订单查询意图：用户查询订单时的操作
 ORDER_INQUIRY:
   description: 用户查询订单状态（如"我的订单怎么样了"、"查一下ORD123"）
-  steps:
-    - action: "extract_order_number"  # 从对话中提取订单号
-      params:
-        chat_history: "${current_user.chat_history}"  # 从历史聊天记录中提取
-      output_var: "order_num"
-      
-    - action: "validate_order"  # 验证订单是否属于当前用户
-      params:
-        order_num: "${order_num}"
-        user_orders: "${current_user.orders}"
-      output_var: "order_valid"
-      on_failure:  # 订单无效时的分支
-        - action: "send_response"
-          params:
-            content: "未找到该订单，请确认订单号是否正确~"
-          terminal: true
-      
-    - action: "fetch_order_status"  # 调用接口获取订单状态
-      params:
-        order_num: "${order_num}"
-      output_var: "order_status"
-      
-    - action: "format_order_response"  # 格式化订单状态响应
-      params:
-        order_num: "${order_num}"
-        status: "${order_status}"
-        nickname: "${current_user.nickname}"
-      output_var: "response_content"
-      
-    - action: "send_response"
-      params:
-        content: "${response_content}"
-      terminal: true
-
-# 帮助意图：用户请求帮助时的操作
-HELP:
-  description: 用户需要帮助（如"怎么下单"、"帮我一下"）
-  steps:
-    - action: "get_help_topics"  # 获取常见帮助主题
-      output_var: "help_topics"
-      
-    - action: "send_response"
-      params:
-        content: "可以帮你解决这些问题哦：\n${join(help_topics, '\n- ')}"
-      terminal: true
-
-# 未知意图处理：当无法识别用户意图时的默认响应
-UNKNOWN:
-  description: 未知意图处理
-  steps:
-    - action: "send_response"
-      params:
-        content: "抱歉，我没太明白您的意思。可以尝试换个说法吗？"
-      terminal: true
+  actions:
+    - check_phone_number  # 先检查是否提供了手机号
