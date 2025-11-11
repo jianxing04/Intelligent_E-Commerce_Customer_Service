@@ -31,11 +31,14 @@ class Receiver:
             log(f"Error: intentions.yaml file not found in {intentsFilePath}", 1, str(current_file_path))
             self.intents = {}
 
+        #记录用户相关信息
         self.phone_number=None
 
+        #意图行为字典
         self.action_handlers = {
             "greet": self._greet,
-            "check_phone_number": self._check_phone_number
+            "check_phone_number": self._check_phone_number,
+            "get_order_info": self._get_order_info
         }
 
     def _extract_intents_for_nlp(self):
@@ -93,6 +96,7 @@ class Receiver:
             return
         for action in actions:
             func=self.action_handlers.get(action)
+            log(f"意图: {intent}, 动作: {action}, 函数: {func}", 2, __file__)
             if func:
                 func()
             else:
@@ -103,12 +107,22 @@ class Receiver:
         print("Hello! How can I assist you today?")
 
     def _check_phone_number(self):
+        self.phone_number=None
         while not self.phone_number:
             print("机器人: 请提供您的手机号码以继续查询订单。")
             phone = input("您（请输入手机号码）: ").strip()
-            res=worker.pharse_phone_number(phone)
-            if res:
+            res=worker.pharse_phone_number(phone).strip()
+            if res and res.isdigit() and len(res) == 11:
                 self.phone_number=res
                 print(f"机器人: 已记录您的手机号码：{self.phone_number}")
             else:
                 print("机器人: 抱歉，未能识别有效的手机号码。请重试。")
+                
+    def _get_order_info(self):
+        order_info = worker.get_order_info(self.phone_number)
+        if order_info:
+            print(f"机器人: 您的订单信息如下：")
+            print(f"用户名：{order_info['user_name']}")
+            print(f"订单状态：{order_info['order_status']}")
+        else:
+            print("机器人: 抱歉，未能获取到您的订单信息。")

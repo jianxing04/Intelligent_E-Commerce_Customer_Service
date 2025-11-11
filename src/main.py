@@ -16,7 +16,6 @@ log("项目根目录已加入 Python 搜索路径", 1, __file__)
 # --------------------------
 # 后续所有模块都能直接绝对导入
 # --------------------------
-# 1. 导入业务模块（如 qwen 的 receiver）
 from src.qwen.receiver import Receiver  
 
 def run_chat():

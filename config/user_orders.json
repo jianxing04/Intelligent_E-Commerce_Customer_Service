@@ -1,0 +1,101 @@
+{
+    "13888888888": {
+      "order_id": "ORD20250520001",
+      "user_name": "张三",
+      "phone": "13888888888",
+      "order_time": "2025-05-20 14:30:22",
+      "products": [
+        {
+          "product_id": "PROD001",
+          "product_name": "无线蓝牙耳机",
+          "price": 299.00,
+          "quantity": 1,
+          "total": 299.00
+        },
+        {
+          "product_id": "PROD002",
+          "product_name": "手机保护膜",
+          "price": 29.90,
+          "quantity": 2,
+          "total": 59.80
+        }
+      ],
+      "order_status": "已发货",
+      "payment_amount": 358.80,
+      "payment_method": "支付宝",
+      "shipping_address": {
+        "province": "广东省",
+        "city": "深圳市",
+        "district": "南山区",
+        "detail": "科技园路100号创新大厦B座1502",
+        "zip_code": "518057"
+      },
+      "logistics_company": "顺丰速运",
+      "tracking_number": "SF1234567890123",
+      "estimated_delivery": "2025-05-22"
+    },
+    "13999999999": {
+      "order_id": "ORD20250521002",
+      "user_name": "李四",
+      "phone": "13999999999",
+      "order_time": "2025-05-21 09:15:46",
+      "products": [
+        {
+          "product_id": "PROD003",
+          "product_name": "智能手表",
+          "price": 899.00,
+          "quantity": 1,
+          "total": 899.00
+        }
+      ],
+      "order_status": "待付款",
+      "payment_amount": 899.00,
+      "payment_method": "未选择",
+      "shipping_address": {
+        "province": "北京市",
+        "city": "北京市",
+        "district": "朝阳区",
+        "detail": "建国路88号现代城5号楼3001",
+        "zip_code": "100022"
+      },
+      "logistics_company": "未发货",
+      "tracking_number": "无",
+      "estimated_delivery": "无"
+    },
+    "13700137000": {
+      "order_id": "ORD20250519003",
+      "user_name": "王五",
+      "phone": "13700137000",
+      "order_time": "2025-05-19 16:42:18",
+      "products": [
+        {
+          "product_id": "PROD004",
+          "product_name": "便携式充电宝20000mAh",
+          "price": 129.00,
+          "quantity": 1,
+          "total": 129.00
+        },
+        {
+          "product_id": "PROD005",
+          "product_name": "Type-C数据线",
+          "price": 19.90,
+          "quantity": 3,
+          "total": 59.70
+        }
+      ],
+      "order_status": "已完成",
+      "payment_amount": 188.70,
+      "payment_method": "微信支付",
+      "shipping_address": {
+        "province": "浙江省",
+        "city": "杭州市",
+        "district": "西湖区",
+        "detail": "文二路391号西湖国际科技大厦A座803",
+        "zip_code": "310012"
+      },
+      "logistics_company": "圆通快递",
+      "tracking_number": "YT9876543210987",
+      "estimated_delivery": "2025-05-21",
+      "actual_delivery": "2025-05-21"
+    }
+  }

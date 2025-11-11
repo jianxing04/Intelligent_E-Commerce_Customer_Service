@@ -12,3 +12,4 @@ ORDER_INQUIRY:
   description: 用户查询订单状态（如"我的订单怎么样了"、"查一下ORD123"）
   actions:
     - check_phone_number  # 先检查是否提供了手机号
+    - get_order_info  # 获取订单信息
