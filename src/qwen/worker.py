@@ -170,7 +170,45 @@ def get_order_info(phone_number: str) -> Optional[dict]:
     except Exception as e:
         log(f"获取订单信息失败：{str(e)}", 1, __file__)
         return None
+
+def query_details(complaint: str) -> Optional[str]:
+    """
+    查询投诉详情
     
+    参数:
+        complaint: 投诉内容
+    返回:
+        投诉详情字符串，若未找到则返回None
+    """
+    complaint = complaint.strip()
+    if not complaint:
+        log("投诉内容为空", 2, __file__)
+        return None
+    
+    system_prompt = f"""你是投诉内容识别工具，需从以下聊天记录中归纳总结投诉内容，帮助客户经理快速理解用户需求，仅返回归纳总结后的投诉内容本身，不添加任何额外内容。"""
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": complaint.strip()}
+    ]
+    
+    api_key = os.getenv("DASHSCOPE_API_KEY")
+    if not api_key:
+        log("环境变量DASHSCOPE_API_KEY未设置或为空", 1, __file__)
+        return None
+    
+    response = Generation.call(
+        api_key=api_key,
+        model="qwen-plus",
+        messages=messages,
+        result_format="message",
+    )
+    
+    complaint_summary = response.output.choices[0].message.content.strip()
+    if complaint_summary == "":
+        return None
+    return complaint_summary
+
 # 测试代码
 if __name__ == "__main__":
     # 测试时打印文件路径，验证是否正确（移植后可通过该输出调试路径问题）

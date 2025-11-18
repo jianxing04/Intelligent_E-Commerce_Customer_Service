@@ -2,6 +2,9 @@ import yaml
 from pathlib import Path
 from src.utils.log import log
 from src.qwen import worker
+import os
+import json
+from datetime import datetime
 
 class Receiver:
     def __init__(self):
@@ -38,7 +41,8 @@ class Receiver:
         self.action_handlers = {
             "greet": self._greet,
             "check_phone_number": self._check_phone_number,
-            "get_order_info": self._get_order_info
+            "get_order_info": self._get_order_info,
+            "query_details": self._query_details
         }
 
     def _extract_intents_for_nlp(self):
@@ -126,3 +130,82 @@ class Receiver:
             print(f"订单状态：{order_info['order_status']}")
         else:
             print("机器人: 抱歉，未能获取到您的订单信息。")
+
+    def _query_details(self):
+        # 动态计算JSON文件路径（基于当前文件的相对路径，不硬编码绝对路径）
+        # 当前文件（receiver.py）的绝对路径
+        current_file_path = os.path.abspath(__file__)
+        # 当前文件所在目录（src/qwen）
+        current_dir = os.path.dirname(current_file_path)
+        # 项目根目录（Intelligent_E-Commerce_Customer_Service）- 向上两级目录
+        project_root = os.path.abspath(os.path.join(current_dir, "../../"))
+        # 目标JSON文件路径（根目录/config/complain_summary.json）
+        json_path = os.path.join(project_root, "config", "complain_summary.json")
+        
+        print("机器人: 十分抱歉给您带来了不好的体验，我们愿意倾听您的意见，请您详细描述您遇到的问题，我们会尽快处理。")
+        complaint = input("您（请输入投诉内容）: ").strip()
+        
+        while True:
+            # 确保用户输入不为空
+            if not complaint:
+                print("机器人: 您的输入不能为空，请重新描述您遇到的问题。")
+                complaint = input("您（请输入投诉内容）: ").strip()
+                continue
+            
+            complaint_summary = worker.query_details(complaint)
+            if complaint_summary:
+                print(f"机器人: 您的投诉内容已经记录，感谢您的反馈！")
+                
+                # 准备要写入的数据（包含时间戳、原始投诉、总结，便于后续分析）
+                complaint_data = {
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # 时间戳
+                    "original_complaint": complaint,  # 原始投诉内容
+                    "summary": complaint_summary  # 投诉总结
+                }
+                
+                # 处理JSON文件追加
+                try:
+                    # 检查目录是否存在，不存在则创建
+                    config_dir = os.path.dirname(json_path)
+                    if not os.path.exists(config_dir):
+                        os.makedirs(config_dir)
+                        log(f"自动创建配置目录: {config_dir}", 2, __file__)
+                    
+                    # 读取现有数据或创建新列表
+                    if os.path.exists(json_path) and os.path.getsize(json_path) > 0:
+                        with open(json_path, 'r', encoding='utf-8') as f:
+                            try:
+                                # 尝试解析JSON数据
+                                data_list = json.load(f)
+                                # 确保数据是列表格式
+                                if not isinstance(data_list, list):
+                                    data_list = [data_list]
+                            except json.JSONDecodeError as e:
+                                # JSON格式错误时，创建新列表并备份错误文件
+                                log(f"警告: JSON文件格式错误，将创建新文件。错误信息: {e}", 2, __file__)
+                                # 备份错误文件（添加时间戳避免覆盖）
+                                backup_path = f"{json_path}.backup.{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                                os.rename(json_path, backup_path)
+                                log(f"错误文件已备份至: {backup_path}", 2, __file__)
+                                data_list = []
+                    else:
+                        # 文件不存在或为空，创建新列表
+                        data_list = []
+                    
+                    # 追加新数据
+                    data_list.append(complaint_data)
+                    
+                    # 写入JSON文件（带格式化，便于阅读）
+                    with open(json_path, 'w', encoding='utf-8') as f:
+                        json.dump(data_list, f, ensure_ascii=False, indent=2)
+                    
+                    log(f"投诉总结已成功保存至: {json_path}", 2, __file__)
+                    break
+                except Exception as e:
+                    # 捕获所有异常，确保程序不崩溃
+                    log(f"警告: 保存投诉总结时发生错误，但您的投诉已记录。错误信息: {e}", 2, __file__)
+                    break
+            
+            # 总结失败时提示用户重新输入
+            print("机器人: 抱歉，未能归纳总结您的投诉内容，请您重新描述您遇到的问题。")
+            complaint = input("您（请输入投诉内容）: ").strip()

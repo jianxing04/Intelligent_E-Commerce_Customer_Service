@@ -13,3 +13,9 @@ ORDER_INQUIRY:
   actions:
     - check_phone_number  # 先检查是否提供了手机号
     - get_order_info  # 获取订单信息
+
+# 投诉意图：用户提出投诉时的处理流程
+COMPLAINT:
+  description: 用户提出投诉（如"我要投诉"、"服务不好"）
+  actions:
+    - query_details
