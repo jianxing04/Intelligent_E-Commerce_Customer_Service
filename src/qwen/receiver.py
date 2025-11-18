@@ -36,13 +36,16 @@ class Receiver:
 
         #记录用户相关信息
         self.phone_number=None
+        self.preferences=None
 
         #意图行为字典
         self.action_handlers = {
             "greet": self._greet,
             "check_phone_number": self._check_phone_number,
             "get_order_info": self._get_order_info,
-            "query_details": self._query_details
+            "query_details": self._query_details,
+            "asking_preferences": self._asking_preferences,
+            "product_recommendation": self._product_recommendation
         }
 
     def _extract_intents_for_nlp(self):
@@ -209,3 +212,19 @@ class Receiver:
             # 总结失败时提示用户重新输入
             print("机器人: 抱歉，未能归纳总结您的投诉内容，请您重新描述您遇到的问题。")
             complaint = input("您（请输入投诉内容）: ").strip()
+
+    def _asking_preferences(self):
+        while True:
+            if not self.preferences:
+                print("机器人: 请问您对商品有什么特殊要求吗？")
+                self.preferences = input("您（请输入特殊要求）: ").strip()
+                continue
+            else:
+                break
+
+    def _product_recommendation(self):
+        res=worker.product_recommendation(self.preferences)
+        if res:
+            print(f"机器人: 为您推荐以下商品：{res}")
+        else:
+            print("机器人: 抱歉，未能推荐商品。")

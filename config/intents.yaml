@@ -19,3 +19,10 @@ COMPLAINT:
   description: 用户提出投诉（如"我要投诉"、"服务不好"）
   actions:
     - query_details
+
+# 商品推荐意图：用户请求推荐商品（如"推荐商品"、"有什么好的商品推荐"）
+PRODUCT_RECOMMENDATION:
+  description: 用户请求推荐商品（如"推荐商品"、"有什么好的商品推荐"）
+  actions:
+    - asking_preferences
+    - product_recommendation

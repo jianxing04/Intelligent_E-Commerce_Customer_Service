@@ -3,6 +3,7 @@ import json
 from typing import Optional
 from dashscope import Generation
 from src.utils.log import log
+from http import HTTPStatus
 
 def recognize_intent(user_input: str, intent_dict: dict) -> Optional[str]:
     """
@@ -209,6 +210,104 @@ def query_details(complaint: str) -> Optional[str]:
         return None
     return complaint_summary
 
+def product_recommendation(preferences: str) -> str | None:
+    """
+    根据用户偏好推荐产品
+    :param preferences: 用户偏好描述字符串
+    :return: 通义千问返回的产品推荐结果，失败返回None
+    """
+
+    if not preferences:
+        log("用户偏好描述为空", 2, __file__)
+        return None
+    
+    # 1. 动态计算products.json路径（跨机器兼容，基于当前文件相对路径）
+    current_file = os.path.abspath(__file__)
+    current_dir = os.path.dirname(current_file)
+    project_root = os.path.abspath(os.path.join(current_dir, "../../"))  # 向上两级到项目根目录
+    products_json_path = os.path.join(project_root, "config", "products.json")
+    
+    # 2. 读取并解析产品JSON文件
+    try:
+        if not os.path.exists(products_json_path):
+            log(f"产品配置文件不存在：{products_json_path}", 2, __file__)
+            return None
+        
+        with open(products_json_path, 'r', encoding='utf-8') as f:
+            try:
+                product_list = json.load(f)
+                # 验证JSON格式是否为列表，且每个产品包含必填字段
+                required_fields = ["产品类型", "热度", "品牌", "名字", "描述", "功能"]
+                if not isinstance(product_list, list) or len(product_list) == 0:
+                    log("products.json格式错误：必须是非空列表", 2, __file__)
+                    return None
+                
+                # 验证每个产品的必填字段
+                for idx, product in enumerate(product_list):
+                    missing_fields = [field for field in required_fields if field not in product]
+                    if missing_fields:
+                        log(f"产品{idx+1}缺少必填字段：{','.join(missing_fields)}", 1, __file__)
+                        continue  # 跳过字段不完整的产品
+            
+            except json.JSONDecodeError as e:
+                log(f"products.json解析失败：{str(e)}", 2, __file__)
+                return None
+    except Exception as e:
+        log(f"读取产品文件时发生错误：{str(e)}", 2, __file__)
+        return None
+    
+    # 3. 构建提示词（清晰告知AI任务、产品库、输出要求）
+    system_prompt = """你是专业的电商产品推荐助手，需要根据用户的偏好描述，从提供的产品库中推荐最匹配的产品。
+要求：
+1. 先理解用户核心需求（如产品类型、功能偏好、品牌倾向等）
+2. 从产品库中筛选出3-5个最匹配的产品，匹配度优先于热度
+3. 每个推荐产品需包含：名字、品牌
+4. 推荐理由简洁明了（1-2句话），说明为何该产品符合用户偏好
+5. 输出格式清晰易读，分点列出推荐结果，不添加任何额外内容
+6. 如果没有匹配的产品，直接返回"未找到符合您偏好的产品，建议尝试其他描述
+7. 谨记，你只需要输出推荐结果，不需要输出任何其他内容。
+产品库数据：
+{}""".format(json.dumps(product_list, ensure_ascii=False, indent=0))  # 序列化产品库为字符串
+
+    # 4. 构建消息体（遵循通义千问API调用格式）
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": preferences.strip()}
+    ]
+    
+    # 5. 调用通义千问API
+    api_key = os.getenv("DASHSCOPE_API_KEY")
+    if not api_key:
+        log("环境变量DASHSCOPE_API_KEY未设置或为空", 1, __file__)
+        return None
+    
+    try:
+        response = Generation.call(
+            api_key=api_key,
+            model="qwen-plus",
+            messages=messages,
+            result_format="message",
+            temperature=0.3,  # 降低随机性，确保推荐结果更精准
+            top_p=0.8  # 控制生成的多样性
+        )
+        
+        # 验证响应状态
+        if response.status_code != HTTPStatus.OK:
+            log(f"API调用失败，状态码：{response.status_code}，错误信息：{response.message}", 2, __file__)
+            return None
+        
+        # 提取推荐结果
+        recommendation = response.output.choices[0].message.content.strip()
+        if not recommendation:
+            log("API返回空的推荐结果", 1, __file__ )
+            return None
+        
+        return recommendation
+
+    except Exception as e:
+        log(f"产品推荐过程中发生未知错误：{str(e)}", 2, __file__)
+        return None
+
 # 测试代码
 if __name__ == "__main__":
     # 测试时打印文件路径，验证是否正确（移植后可通过该输出调试路径问题）
@@ -225,3 +324,5 @@ if __name__ == "__main__":
         print(f"\n查询成功（{test_phone1}）：")
         print(f"用户名：{order1['user_name']}")
         print(f"订单状态：{order1['order_status']}\n")
+
+

@@ -3,5 +3,15 @@
     "timestamp": "2025-11-18 09:03:38",
     "original_complaint": "你们的快递行不行啊，不行承包给我来做",
     "summary": "快递服务不满意，用户质疑快递能力并提出由其承包的意向。"
+  },
+  {
+    "timestamp": "2025-11-18 09:12:01",
+    "original_complaint": "你们快递慢成啥样了",
+    "summary": "快递速度太慢"
+  },
+  {
+    "timestamp": "2025-11-18 09:14:16",
+    "original_complaint": "exit",
+    "summary": "无投诉内容。"
   }
 ]
