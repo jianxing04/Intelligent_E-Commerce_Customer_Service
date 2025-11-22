@@ -26,3 +26,16 @@ PRODUCT_RECOMMENDATION:
   actions:
     - asking_preferences
     - product_recommendation
+
+# 询问会员卡意图：用户询问会员相关问题（如"会员怎么办理"、"会员有什么优惠"）
+MEMBERSHIP:
+  description: 用户询问会员相关问题（如"我的会员怎么办理"、"我的会员有什么优惠"，“我的会员咋样了”，“我的会员到期了吗”）
+  actions:
+    - check_phone_number
+    - get_membership_info
+
+# 无法识别的意图
+DEFAULT:
+  description: 当用户的输入无法匹配上面的任何一个意图时，请选择这一项
+  actions:
+    - appology

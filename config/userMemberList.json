@@ -1,0 +1,49 @@
+{
+    "userMemberList": [
+      {
+        "userId": "U00001",
+        "phone": "13888888888",
+        "username": "张三",
+        "memberType": "普通会员",
+        "memberValidity": "2026-11-22",
+        "registerTime": "2024-03-15",
+        "memberPoints": 3580
+      },
+      {
+        "userId": "U00002",
+        "phone": "13999999999",
+        "username": "李四",
+        "memberType": "中级会员",
+        "memberValidity": "2027-05-18",
+        "registerTime": "2023-11-02",
+        "memberPoints": 8920
+      },
+      {
+        "userId": "U00003",
+        "phone": "13500135000",
+        "username": "王五",
+        "memberType": "非会员",
+        "memberValidity": "无",
+        "registerTime": "2025-01-20",
+        "memberPoints": 0
+      },
+      {
+        "userId": "U00004",
+        "phone": "13600136000",
+        "username": "赵六",
+        "memberType": "高级会员",
+        "memberValidity": "2028-09-30",
+        "registerTime": "2022-07-11",
+        "memberPoints": 15640
+      },
+      {
+        "userId": "U00005",
+        "phone": "13700137000",
+        "username": "孙七",
+        "memberType": "VIP会员",
+        "memberValidity": "永久有效",
+        "registerTime": "2021-05-08",
+        "memberPoints": 32800
+      }
+    ]
+  }

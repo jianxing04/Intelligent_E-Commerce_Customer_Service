@@ -13,5 +13,20 @@
     "timestamp": "2025-11-18 09:14:16",
     "original_complaint": "exit",
     "summary": "无投诉内容。"
+  },
+  {
+    "timestamp": "2025-11-22 13:30:53",
+    "original_complaint": "我的快递好几十天了还没有变化",
+    "summary": "快递长时间未更新物流信息"
+  },
+  {
+    "timestamp": "2025-11-22 15:49:58",
+    "original_complaint": "你们的快递太慢了",
+    "summary": "快递配送速度太慢"
+  },
+  {
+    "timestamp": "2025-11-22 16:28:23",
+    "original_complaint": "我等了你们快递10天",
+    "summary": "等待快递时间过长，已等待10天"
   }
 ]
